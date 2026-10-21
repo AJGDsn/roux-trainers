@@ -13,6 +13,8 @@ import Brightness6Icon from '@mui/icons-material/Brightness6';
 import IconButton from "@mui/material/IconButton";
 import { SelectChangeEvent } from '@mui/material/Select';
 import { tab_modes } from "./AppView";
+import SmartCubeControls from "./SmartCubeControls";
+import { Action } from "../Types";
 
 import { theme } from '../theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -66,10 +68,11 @@ const useStyles = makeStyles(theme => {
 
 
 function TopBarView(props: { value: number, onChange: (x: number) => void,
-    toggleFav: () => void, toggleBright: () => void, handleInfoOpen: () => void } )
+    toggleFav: () => void, toggleBright: () => void, handleInfoOpen: () => void,
+    dispatch: React.Dispatch<Action> } )
 {
     let classes = useStyles()
-    let { value, onChange, toggleFav, toggleBright, handleInfoOpen } = props
+    let { value, onChange, toggleFav, toggleBright, handleInfoOpen, dispatch } = props
     let value_str = tab_modes[value][1] || ""
     let handleChange = (event: SelectChangeEvent<String>) =>  {
         let tab_idx = tab_modes.findIndex(x => x[1] === (event.target.value as string))
@@ -102,7 +105,8 @@ function TopBarView(props: { value: number, onChange: (x: number) => void,
                 </Select>
             </Box>
             <Box style={{flexGrow: 10}}> </Box>
-            <Box>
+            <Box style={{display: "flex", flexWrap: "nowrap"}}>
+              <SmartCubeControls dispatch={dispatch} size={is_sm ? "small" : "large"} />
               <IconButton onClick={toggleFav} size={is_sm ? "small" : "large"}>
                   <BookmarkIcon />
               </IconButton>

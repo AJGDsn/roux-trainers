@@ -7,6 +7,7 @@ import * as chroma from 'chroma-js';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { OrbitControls } from '../lib/three/OrbitControls';
+import * as SmartCube from '../lib/SmartCube';
 
 type Config = {
     cube: FaceletCubeT, width: number, height: number, colorScheme: Array<string>, facesToReveal: Face[],
@@ -349,6 +350,7 @@ const redraw_cube = function (cube: FaceletCubeT, config: ConfigT ) {
     let frameID = -1
     const animate = () => {
         frameID = requestAnimationFrame(animate)
+        cubeG.quaternion.copy(SmartCube.viewRotation())
         renderer.render(scene, camera)
     }
     animate()

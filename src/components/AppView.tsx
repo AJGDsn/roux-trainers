@@ -217,6 +217,7 @@ function AppView(props: { state: AppState, dispatch: React.Dispatch<Action> } ) 
 
       <TopBarView onChange={handleChange} value={value}
         handleInfoOpen={handleInfoOpen} toggleBright={toggleBright} toggleFav={toggleFav}
+        dispatch={dispatch}
       />
 
       <Box paddingY={2} paddingX={0}>
