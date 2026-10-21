@@ -1,3 +1,49 @@
+# Roux Trainers, with smart cube support
+
+**Live: https://ajgdsn.github.io/roux-trainers/**
+
+This is a fork of [onionhoney's Roux Trainers](https://github.com/onionhoney/roux-trainers)
+([live](https://onionhoney.github.io/roux-trainers/)). Every trainer works exactly as in the
+original; the fork adds a smart cube as a controller.
+
+## Smart cube
+
+- Click the Bluetooth button in the top bar and pick your cube. It works in Chrome or Edge
+  on a computer or Android (browsers with Web Bluetooth); elsewhere the button doesn't appear.
+- **Moves:** each turn of the cube is applied to the virtual cube, just as a keyboard move is.
+  The virtual cube's state is the trainer's own and is never copied from the physical cube,
+  so the cube needn't be solved or scrambled to match.
+- **Gyro:** turning the cube in your hand turns the 3D view. Hold the cube the way the trainer
+  shows it and click the target button to reset the view; the rotate button turns the gyro off.
+- A cube reports outer-layer turns only, so a physical M arrives as R L'. The pieces still end
+  up right relative to each other, and with the gyro on the view turns to match.
+- GAN cubes need the cube's Bluetooth MAC address. Chrome usually reads it; if not, you'll be
+  asked for it once (the cube's own app shows it).
+- Built on [smartcube-web-bluetooth](https://github.com/poliva/smartcube-web-bluetooth), which
+  supports GAN (including the GAN16ui), MoYu, QiYi, Giiker and GoCube cubes.
+
+## Changes from the original
+
+- (October 2026) Smart cube support: `src/lib/SmartCube.ts`, `src/components/SmartCubeControls.tsx`,
+  and a gyro hook in `src/components/CubeSim.tsx`. `config-overrides.js` compiles the Bluetooth
+  library for the app's older webpack.
+- (October 2026) Google Analytics removed.
+
+## Building
+
+```
+npm ci
+npm start                       # dev server
+npm run build
+npx gh-pages -d build           # publish to GitHub Pages
+```
+
+Licensed under GPL-3.0, as the original is.
+
+---
+
+*The original README follows.*
+
 # Onionhoney's Roux Trainers
 - A trainer collection that caters to all your Roux training needs  ❤️
 - Inspired by http://cubegrass.appspot.com/, but with everything that it is missing.

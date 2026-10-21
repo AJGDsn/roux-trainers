@@ -31,7 +31,6 @@
     "postcss": "^8.3.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-ga": "^3.3.0",
     "react-scripts": "^4.0.3",
     "smartcube-web-bluetooth": "github:poliva/smartcube-web-bluetooth#2077416d6c828ec926dee424cf1bbfe4c0f25a47",
     "sr-visualizer": "^1.0.8",
