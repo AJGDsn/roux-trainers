@@ -26,7 +26,7 @@ import { ColorPanel } from './Input';
 import { CaseDesc } from '../lib/Algs';
 import { ScrambleInputView } from './ScrambleInputView';
 import { CustomTooltip } from './Tooltip';
-import { SmartScramble } from './SmartTrainer';
+import * as SmartCube from '../lib/SmartCube';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -123,7 +123,7 @@ const useStyles = makeStyles(theme => ({
   }))
 
 
-export function getMask(state: AppState) : Mask {
+function getMask(state: AppState) : Mask {
     if (state.mode === "fbdr") {
       const fbOnly = (state.case.desc.length === 0 || state.case.desc[0].kind === "fb")
       //   getActiveName(state.config.fbOnlySelector) === "FB Last Pair"
@@ -241,6 +241,12 @@ function BlockTrainerView(props: { state: AppState, dispatch: React.Dispatch<Act
       };
     });
 
+    // A smart cube's four-turn gesture presses the Reveal/Next button.
+    React.useEffect(() => {
+      window.addEventListener(SmartCube.BUTTON_EVENT, handleSpace);
+      return () => window.removeEventListener(SmartCube.BUTTON_EVENT, handleSpace);
+    });
+
     const [favSelected, setFav] = React.useState(false)
     const handleFav = () => {
       if (state.case.desc.length === 0) return
@@ -313,7 +319,7 @@ function BlockTrainerView(props: { state: AppState, dispatch: React.Dispatch<Act
           <Box style={{}} className={classes.fgap} />
           <Box style={{display: "flex", alignItems: "center", flexGrow: 1}}>
             <Typography className={classes.setup} >
-                  <SmartScramble setup={setup} revealed={state.name === "revealed"} />
+                  {setup}
             </Typography>
           </Box>
           <Box style={{}} className={classes.fgap} />

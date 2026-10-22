@@ -7,13 +7,13 @@ import BluetoothConnectedIcon from '@mui/icons-material/BluetoothConnected';
 import BluetoothSearchingIcon from '@mui/icons-material/BluetoothSearching';
 import ScreenRotationIcon from '@mui/icons-material/ScreenRotation';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
+import TouchAppIcon from '@mui/icons-material/TouchApp';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 
 import { Action } from "../Types";
 import * as SmartCube from '../lib/SmartCube';
 
-// Top-bar buttons for a smart cube: connect, scramble checker or controller,
+// Top-bar buttons for a smart cube: connect, Reveal/Next gestures or controller,
 // and (as a controller) gyro on/off and reset the view.
 // Nothing shows in browsers without Web Bluetooth.
 function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "small" | "large" }) {
@@ -42,11 +42,11 @@ function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "sma
     return (
         <React.Fragment>
             {status.connected &&
-                <Tooltip title={control ? "The cube is a controller: click to check scrambles instead"
-                                        : "Checking scrambles: click to use the cube as a controller instead"}>
-                    <IconButton onClick={() => SmartCube.setMode(control ? "check" : "control")} size={size}
+                <Tooltip title={control ? "The cube is a controller: click to use it for Reveal/Next only"
+                                        : "Four turns of one face press Reveal/Next: click to use the cube as a controller instead"}>
+                    <IconButton onClick={() => SmartCube.setMode(control ? "buttons" : "control")} size={size}
                         onFocus={(e) => e.target.blur()}>
-                        {control ? <SportsEsportsIcon /> : <FactCheckIcon />}
+                        {control ? <SportsEsportsIcon /> : <TouchAppIcon />}
                     </IconButton>
                 </Tooltip>
             }

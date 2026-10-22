@@ -11,29 +11,16 @@ original; the fork adds smart cube support.
 Click the Bluetooth button in the top bar and pick your cube. It works in Chrome or Edge
 on a computer or Android (browsers with Web Bluetooth); elsewhere the button doesn't appear.
 
-### Scramble checker (the default)
+### Reveal/Next gestures (the default)
 
-Use your real cube for the drill, with no keyboard.
-
-1. **Build the block.** Only the pieces the trainer cares about matter (the block for the
-   block trainers, F2B and corners for CMLL, the whole cube for LSE). The rest of the cube can
-   be anything, and the block can be any colours: the virtual cube takes your cube's colours.
-2. **Scramble.** Hold the cube as the message under the scramble says, and turn the scramble.
-   Each move turns green when it's done and amber while it's half done (one face of an M, one
-   quarter of a U2). After a wrong turn, the message says how to get back on track.
-3. **Solve.** The virtual cube follows your cube throughout.
-4. **Gestures:** four turns of one face, in either direction, return the cube to where it was.
-   - Any of them, while the solutions are hidden, **reveals** them.
-   - Once they're showing and the block is built: **U4** gives the next scramble, and **D4**
-     the same scramble again.
-
-A cube reports outer-layer turns only, relative to its centres: an M arrives as R L', and an r
-as L. The checker compares whole states up to rotation, so slices, wide moves and half turns
-count however they're done.
+Scramble and solve on your real cube; the virtual cube stays as the trainer shows it.
+**Four turns of one face in the same direction** (U4, D4, R'4...), which leave the cube as it
+was, press the trainer's Reveal/Next button: once to reveal the solutions, again for the next
+scramble. In CMLL they press Show, then Next. So a drill needs no keyboard.
 
 ### Controller
 
-The gamepad/checklist button switches modes. As a controller, each turn of the cube is applied
+The hand/gamepad button switches modes. As a controller, each turn of the cube is applied
 to the virtual cube as a keyboard move is, and the gyro turns the 3D view (the rotate button
 turns it off; the target button resets the view). This mode is kept for future work: its gyro
 view isn't reliable yet.
@@ -42,10 +29,8 @@ view isn't reliable yet.
 
 - GAN cubes need the cube's Bluetooth MAC address. Chrome usually reads it; if not, you'll be
   asked for it once (the cube's own app shows it).
-- The virtual cube's colours assume a standard colour scheme (white opposite yellow, green
-  front with white on top, red on the right).
 - For development without a cube, `npm start` and in the browser console:
-  `smartcubeSim.connect()`, then `smartcubeSim.moves("R U R'")` (moves in the cube's own frame).
+  `smartcubeSim.connect()`, then `smartcubeSim.moves("U U U U")`.
 - Built on [smartcube-web-bluetooth](https://github.com/poliva/smartcube-web-bluetooth), which
   supports GAN (including the GAN16ui), MoYu, QiYi, Giiker and GoCube cubes.
 
@@ -55,9 +40,9 @@ view isn't reliable yet.
   and a gyro hook in `src/components/CubeSim.tsx`. `config-overrides.js` compiles the Bluetooth
   library for the app's older webpack.
 - (October 2026) Google Analytics removed.
-- (October 2026) Scramble checker: `src/lib/ScrambleTracker.ts` (with tests), and
-  `src/components/SmartTrainer.tsx`, which shows the checked scramble in the block, LSE and
-  CMLL trainers.
+- (October 2026) Reveal/Next gestures: `SmartCube.ts` raises an event that `BlockTrainerView`
+  and `CmllTrainerView` treat as a click. A scramble checker that followed the real cube was
+  tried and set aside; it is in commit 3fe341e if wanted again.
 
 ## Building
 

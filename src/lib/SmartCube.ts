@@ -2,8 +2,10 @@
 Smart cube support, through smartcube-web-bluetooth (poliva).
 
 Two modes:
-- "check" (the default): the cube's moves and facelets go to the scramble
-  checker (ScrambleTracker, driven by SmartTrainer), which follows the real cube.
+- "buttons" (the default): the cube never moves the virtual cube. Four turns of
+  one face in one direction (which leave the cube as it was) press the trainer's
+  Reveal/Next button, so a drill needs no keyboard. The trainer views listen
+  for BUTTON_EVENT and do what a click on that button does.
 - "control": the cube is a controller, not a mirror. Its moves are dispatched
   exactly as keyboard moves are ({type: "key", content: "R'"}), so every trainer
   handles them the way it handles keys, and its gyro turns the virtual cube.
@@ -27,21 +29,20 @@ export type SmartCubeStatus = {
     error: string
 }
 
-export type Mode = "check" | "control"
+export type Mode = "buttons" | "control"
 type MoveHandler = (move: string) => void
-type TrackerHandlers = { move: (move: string, time: number) => void, facelets: (facelets: string) => void }
 type StatusHandler = (status: SmartCubeStatus) => void
 
 const MAC_RE = /^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/
 const MAC_STORAGE = "smartcube-mac:"
 const GYRO_STORAGE = "smartcube-gyro-enabled"
 const MODE_STORAGE = "smartcube-mode"
-const SOLVED = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+export const BUTTON_EVENT = "smartcube-button"
 
 let conn: SmartCubeConnection | null = null
 let sub: { unsubscribe: () => void } | null = null
 let moveHandler: MoveHandler | null = null
-let trackerHandlers: TrackerHandlers | null = null
+let recentMoves: string[] = []
 const statusHandlers = new Set<StatusHandler>()
 
 let status: SmartCubeStatus = {
@@ -60,7 +61,7 @@ function readGyroEnabled() {
 }
 
 function readMode(): Mode {
-    try { return localStorage.getItem(MODE_STORAGE) === "control" ? "control" : "check" } catch { return "check" }
+    try { return localStorage.getItem(MODE_STORAGE) === "control" ? "control" : "buttons" } catch { return "buttons" }
 }
 
 function setStatus(change: Partial<SmartCubeStatus>) {
@@ -90,10 +91,7 @@ function handleEvent(e: SmartCubeEvent) {
     switch (e.type) {
         case "MOVE":
             if (status.mode === "control") moveHandler?.(e.move.trim())
-            else trackerHandlers?.move(e.move.trim(), e.localTimestamp ?? e.timestamp)
-            break
-        case "FACELETS":
-            trackerHandlers?.facelets(e.facelets)
+            else onButtonMove(e.move.trim())
             break
         case "GYRO": {
             const { x, y, z, w } = e.quaternion
@@ -110,6 +108,15 @@ function handleEvent(e: SmartCubeEvent) {
         case "DISCONNECT":
             cleanup()
             break
+    }
+}
+
+// Four of the same quarter turn in a row press the button.
+function onButtonMove(move: string) {
+    recentMoves = [...recentMoves, move].slice(-4)
+    if (recentMoves.length === 4 && recentMoves.every(m => m === move)) {
+        recentMoves = []
+        window.dispatchEvent(new Event(BUTTON_EVENT))
     }
 }
 
@@ -139,21 +146,10 @@ export function setMoveHandler(handler: MoveHandler | null) {
     moveHandler = handler
 }
 
-export function setTrackerHandlers(handlers: TrackerHandlers | null) {
-    trackerHandlers = handlers
-}
-
 export function setMode(mode: Mode) {
     try { localStorage.setItem(MODE_STORAGE, mode) } catch {}
+    recentMoves = []
     setStatus({ mode })
-    if (mode === "check") requestFacelets()
-}
-
-// Ask the cube for its whole state. A cube that can't report it is taken as solved.
-export function requestFacelets() {
-    if (!conn) return
-    if (conn.capabilities.facelets) conn.sendCommand({ type: "REQUEST_FACELETS" }).catch(() => {})
-    else trackerHandlers?.facelets(SOLVED)
 }
 
 export async function connect() {
@@ -166,7 +162,6 @@ export async function connect() {
         if (conn.capabilities.battery) {
             conn.sendCommand({ type: "REQUEST_BATTERY" }).catch(() => {})
         }
-        requestFacelets()
     } catch (err) {
         conn = null
         const message = String((err as Error)?.message ?? err)
@@ -207,19 +202,16 @@ export function viewRotation(): THREE.Quaternion {
     return viewQuat
 }
 
-// Development builds only: a pretend cube, for trying the checker without one.
-// In the console: smartcubeSim.connect(), then smartcubeSim.moves("R U R' L ...").
+// Development builds only: a pretend cube, for trying it without one.
+// In the console: smartcubeSim.connect(), then smartcubeSim.moves("U U U U").
 if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
-    let time = 0
     ;(window as any).smartcubeSim = {
-        connect(facelets = SOLVED) {
+        connect() {
             setStatus({ connected: true, name: "Simulated cube" })
-            trackerHandlers?.facelets(facelets)
         },
-        moves(seq: string, gapMs = 400) {
+        moves(seq: string) {
             for (const move of seq.split(/\s+/).filter(m => m)) {
-                time += gapMs
-                handleEvent({ type: "MOVE", move, face: 0, direction: 0, localTimestamp: time, cubeTimestamp: null, timestamp: time })
+                handleEvent({ type: "MOVE", move, face: 0, direction: 0, localTimestamp: null, cubeTimestamp: null, timestamp: 0 })
             }
         },
     }

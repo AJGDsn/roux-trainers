@@ -21,7 +21,7 @@ import { cmll_algs_raw, nmcll_display_parity, nmcll_to_cmll_mapping, ollcp_algs_
 import CaseVisualizer from './CaseVisualizer';
 import { CubeSim2D, CubeSimFlat3D } from './CubeSim2D';
 import { Face } from '../lib/Defs';
-import { SmartScramble, REVEAL_EVENT } from './SmartTrainer';
+import * as SmartCube from '../lib/SmartCube';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -200,10 +200,7 @@ export function CmllTrainerView(props: { state: AppState, dispatch: React.Dispat
       </Box>
     )
 
-    // A smart cube's reveal lasts the rest of its case: each cube move changes the state.
-    const smartRevealedCase = React.useRef<object | null>(null)
     React.useEffect( () =>  {
-      if (smartRevealedCase.current === state.case) return
       setReveal(false) // todo: drive this from props. now there's a delay which causes the answer to leak for a split second
     }, [ state ])
     const [reveal, setReveal] = React.useState(false)
@@ -228,15 +225,12 @@ export function CmllTrainerView(props: { state: AppState, dispatch: React.Dispat
       };
     });
 
-    // A smart cube's U4 reveals, as "/" does.
+    // A smart cube's four-turn gesture presses Show, then Next.
     React.useEffect(() => {
-      const handleReveal = () => {
-        smartRevealedCase.current = state.case
-        setReveal(true)
-      }
-      window.addEventListener(REVEAL_EVENT, handleReveal);
-      return () => window.removeEventListener(REVEAL_EVENT, handleReveal);
-    }, [state.case]);
+      const handleButton = () => reveal ? handleNext() : setReveal(true)
+      window.addEventListener(SmartCube.BUTTON_EVENT, handleButton);
+      return () => window.removeEventListener(SmartCube.BUTTON_EVENT, handleButton);
+    });
 
     let alg = ""
     let setup = ""
@@ -319,7 +313,7 @@ export function CmllTrainerView(props: { state: AppState, dispatch: React.Dispat
       <Grid item xs={9}>
         <Box paddingBottom={1} lineHeight={1} >
           <Typography style={{whiteSpace: 'pre-line', fontSize: 18, fontWeight: 500}}>
-            <SmartScramble setup={setup} revealed={reveal} />
+            { setup }
           </Typography>
         </Box>
 
