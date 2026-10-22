@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.js": "/roux-trainers/static/js/main.9b6ae2f0.chunk.js",
-    "main.js.map": "/roux-trainers/static/js/main.9b6ae2f0.chunk.js.map",
+    "main.js": "/roux-trainers/static/js/main.097a696e.chunk.js",
+    "main.js.map": "/roux-trainers/static/js/main.097a696e.chunk.js.map",
     "runtime-main.js": "/roux-trainers/static/js/runtime-main.800f274a.js",
     "runtime-main.js.map": "/roux-trainers/static/js/runtime-main.800f274a.js.map",
     "static/css/2.658d00ee.chunk.css": "/roux-trainers/static/css/2.658d00ee.chunk.css",
-    "static/js/2.6ccc19a4.chunk.js": "/roux-trainers/static/js/2.6ccc19a4.chunk.js",
-    "static/js/2.6ccc19a4.chunk.js.map": "/roux-trainers/static/js/2.6ccc19a4.chunk.js.map",
+    "static/js/2.d163f4ae.chunk.js": "/roux-trainers/static/js/2.d163f4ae.chunk.js",
+    "static/js/2.d163f4ae.chunk.js.map": "/roux-trainers/static/js/2.d163f4ae.chunk.js.map",
     "index.html": "/roux-trainers/index.html",
     "static/css/2.658d00ee.chunk.css.map": "/roux-trainers/static/css/2.658d00ee.chunk.css.map",
-    "static/js/2.6ccc19a4.chunk.js.LICENSE.txt": "/roux-trainers/static/js/2.6ccc19a4.chunk.js.LICENSE.txt",
+    "static/js/2.d163f4ae.chunk.js.LICENSE.txt": "/roux-trainers/static/js/2.d163f4ae.chunk.js.LICENSE.txt",
     "static/js/analyzer-worker.ca439f15.chunk.worker.js": "/roux-trainers/static/js/analyzer-worker.ca439f15.chunk.worker.js",
     "static/js/analyzer-worker.ca439f15.chunk.worker.js.map": "/roux-trainers/static/js/analyzer-worker.ca439f15.chunk.worker.js.map",
     "static/media/index.css": "/roux-trainers/static/media/roboto-mono-latin-700italic.a2b3b9b9.woff"
@@ -17,7 +17,7 @@
   "entrypoints": [
     "static/js/runtime-main.800f274a.js",
     "static/css/2.658d00ee.chunk.css",
-    "static/js/2.6ccc19a4.chunk.js",
-    "static/js/main.9b6ae2f0.chunk.js"
+    "static/js/2.d163f4ae.chunk.js",
+    "static/js/main.097a696e.chunk.js"
   ]
 }
