@@ -43,7 +43,7 @@ function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "sma
         <React.Fragment>
             {status.connected &&
                 <Tooltip title={control ? "The cube is a controller: click to use it for Reveal/Next only"
-                                        : "Four turns of one face press Reveal/Next: click to use the cube as a controller instead"}>
+                                        : "Four turns of one face (U U U U or U U' U U') press Reveal/Next: click to use the cube as a controller instead"}>
                     <IconButton onClick={() => SmartCube.setMode(control ? "buttons" : "control")} size={size}
                         onFocus={(e) => e.target.blur()}>
                         {control ? <SportsEsportsIcon /> : <TouchAppIcon />}

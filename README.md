@@ -14,8 +14,8 @@ on a computer or Android (browsers with Web Bluetooth); elsewhere the button doe
 ### Reveal/Next gestures (the default)
 
 Scramble and solve on your real cube; the virtual cube stays as the trainer shows it.
-**Four turns of one face in the same direction** (U4, D4, R'4...), which leave the cube as it
-was, press the trainer's Reveal/Next button: once to reveal the solutions, again for the next
+**Four quarter turns of one face**, all one way (U U U U) or back and forth (U U' U U'), on
+any face, leave the cube as it was and press the trainer's Reveal/Next button: once to reveal the solutions, again for the next
 scramble. In CMLL they press Show, then Next. So a drill needs no keyboard.
 
 ### Controller

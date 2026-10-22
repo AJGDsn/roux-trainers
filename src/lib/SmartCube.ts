@@ -2,8 +2,9 @@
 Smart cube support, through smartcube-web-bluetooth (poliva).
 
 Two modes:
-- "buttons" (the default): the cube never moves the virtual cube. Four turns of
-  one face in one direction (which leave the cube as it was) press the trainer's
+- "buttons" (the default): the cube never moves the virtual cube. Four quarter turns
+  of one face, all one way (U U U U) or back and forth (U U' U U'), leave the
+  cube as it was and press the trainer's
   Reveal/Next button, so a drill needs no keyboard. The trainer views listen
   for BUTTON_EVENT and do what a click on that button does.
 - "control": the cube is a controller, not a mirror. Its moves are dispatched
@@ -111,10 +112,15 @@ function handleEvent(e: SmartCubeEvent) {
     }
 }
 
-// Four of the same quarter turn in a row press the button.
+// Four quarter turns of one face in a row, all one way or back and forth, press
+// the button. No time limit: a solve never turns a face back and forth twice.
 function onButtonMove(move: string) {
     recentMoves = [...recentMoves, move].slice(-4)
-    if (recentMoves.length === 4 && recentMoves.every(m => m === move)) {
+    const r = recentMoves
+    const oneFace = r.every(m => m[0] === move[0])
+    const oneWay = r.every(m => m === move)
+    const backAndForth = r.every((m, i) => i === 0 || m !== r[i - 1])
+    if (r.length === 4 && oneFace && (oneWay || backAndForth)) {
         recentMoves = []
         window.dispatchEvent(new Event(BUTTON_EVENT))
     }
