@@ -4,21 +4,48 @@
 
 This is a fork of [onionhoney's Roux Trainers](https://github.com/onionhoney/roux-trainers)
 ([live](https://onionhoney.github.io/roux-trainers/)). Every trainer works exactly as in the
-original; the fork adds a smart cube as a controller.
+original; the fork adds smart cube support.
 
 ## Smart cube
 
-- Click the Bluetooth button in the top bar and pick your cube. It works in Chrome or Edge
-  on a computer or Android (browsers with Web Bluetooth); elsewhere the button doesn't appear.
-- **Moves:** each turn of the cube is applied to the virtual cube, just as a keyboard move is.
-  The virtual cube's state is the trainer's own and is never copied from the physical cube,
-  so the cube needn't be solved or scrambled to match.
-- **Gyro:** turning the cube in your hand turns the 3D view. Hold the cube the way the trainer
-  shows it and click the target button to reset the view; the rotate button turns the gyro off.
-- A cube reports outer-layer turns only, so a physical M arrives as R L'. The pieces still end
-  up right relative to each other, and with the gyro on the view turns to match.
+Click the Bluetooth button in the top bar and pick your cube. It works in Chrome or Edge
+on a computer or Android (browsers with Web Bluetooth); elsewhere the button doesn't appear.
+
+### Scramble checker (the default)
+
+Use your real cube for the drill, with no keyboard.
+
+1. **Build the block.** Only the pieces the trainer cares about matter (the block for the
+   block trainers, F2B and corners for CMLL, the whole cube for LSE). The rest of the cube can
+   be anything, and the block can be any colours: the virtual cube takes your cube's colours.
+2. **Scramble.** Hold the cube as the message under the scramble says, and turn the scramble.
+   Each move turns green when it's done and amber while it's half done (one face of an M, one
+   quarter of a U2). After a wrong turn, the message says how to get back on track.
+3. **Solve.** The virtual cube follows your cube throughout.
+4. **Gestures:** four turns of one face, in either direction, return the cube to where it was.
+   - Any of them, while the solutions are hidden, **reveals** them.
+   - Once they're showing and the block is built: **U4** gives the next scramble, and **D4**
+     the same scramble again.
+
+A cube reports outer-layer turns only, relative to its centres: an M arrives as R L', and an r
+as L. The checker compares whole states up to rotation, so slices, wide moves and half turns
+count however they're done.
+
+### Controller
+
+The gamepad/checklist button switches modes. As a controller, each turn of the cube is applied
+to the virtual cube as a keyboard move is, and the gyro turns the 3D view (the rotate button
+turns it off; the target button resets the view). This mode is kept for future work: its gyro
+view isn't reliable yet.
+
+### Notes
+
 - GAN cubes need the cube's Bluetooth MAC address. Chrome usually reads it; if not, you'll be
   asked for it once (the cube's own app shows it).
+- The virtual cube's colours assume a standard colour scheme (white opposite yellow, green
+  front with white on top, red on the right).
+- For development without a cube, `npm start` and in the browser console:
+  `smartcubeSim.connect()`, then `smartcubeSim.moves("R U R'")` (moves in the cube's own frame).
 - Built on [smartcube-web-bluetooth](https://github.com/poliva/smartcube-web-bluetooth), which
   supports GAN (including the GAN16ui), MoYu, QiYi, Giiker and GoCube cubes.
 
@@ -28,6 +55,9 @@ original; the fork adds a smart cube as a controller.
   and a gyro hook in `src/components/CubeSim.tsx`. `config-overrides.js` compiles the Bluetooth
   library for the app's older webpack.
 - (October 2026) Google Analytics removed.
+- (October 2026) Scramble checker: `src/lib/ScrambleTracker.ts` (with tests), and
+  `src/components/SmartTrainer.tsx`, which shows the checked scramble in the block, LSE and
+  CMLL trainers.
 
 ## Building
 

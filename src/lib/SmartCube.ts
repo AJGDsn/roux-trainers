@@ -1,10 +1,12 @@
 /*
 Smart cube support, through smartcube-web-bluetooth (poliva).
 
-The smart cube is a controller, not a mirror: its moves are dispatched exactly as
-keyboard moves are ({type: "key", content: "R'"}), so every trainer handles them
-the way it handles keys. Its gyro turns the virtual cube on screen. The virtual
-cube's state is the trainer's own and never synced from the physical cube.
+Two modes:
+- "check" (the default): the cube's moves and facelets go to the scramble
+  checker (ScrambleTracker, driven by SmartTrainer), which follows the real cube.
+- "control": the cube is a controller, not a mirror. Its moves are dispatched
+  exactly as keyboard moves are ({type: "key", content: "R'"}), so every trainer
+  handles them the way it handles keys, and its gyro turns the virtual cube.
 
 A cube reports outer-layer turns only, so a physical M arrives as R L'. The
 pieces still end up right relative to each other, and the gyro (which sits in
@@ -21,24 +23,30 @@ export type SmartCubeStatus = {
     battery: number | null,
     gyro: boolean,      // the cube has a gyroscope
     gyroEnabled: boolean,
+    mode: Mode,
     error: string
 }
 
+export type Mode = "check" | "control"
 type MoveHandler = (move: string) => void
+type TrackerHandlers = { move: (move: string, time: number) => void, facelets: (facelets: string) => void }
 type StatusHandler = (status: SmartCubeStatus) => void
 
 const MAC_RE = /^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/
 const MAC_STORAGE = "smartcube-mac:"
 const GYRO_STORAGE = "smartcube-gyro-enabled"
+const MODE_STORAGE = "smartcube-mode"
+const SOLVED = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
 
 let conn: SmartCubeConnection | null = null
 let sub: { unsubscribe: () => void } | null = null
 let moveHandler: MoveHandler | null = null
+let trackerHandlers: TrackerHandlers | null = null
 const statusHandlers = new Set<StatusHandler>()
 
 let status: SmartCubeStatus = {
     connected: false, connecting: false, name: "", battery: null,
-    gyro: false, gyroEnabled: readGyroEnabled(), error: ""
+    gyro: false, gyroEnabled: readGyroEnabled(), mode: readMode(), error: ""
 }
 
 // Latest gyro reading, in three.js axes, and the reading taken as "home".
@@ -49,6 +57,10 @@ const viewQuat = new THREE.Quaternion()
 
 function readGyroEnabled() {
     try { return localStorage.getItem(GYRO_STORAGE) !== "0" } catch { return true }
+}
+
+function readMode(): Mode {
+    try { return localStorage.getItem(MODE_STORAGE) === "control" ? "control" : "check" } catch { return "check" }
 }
 
 function setStatus(change: Partial<SmartCubeStatus>) {
@@ -77,7 +89,11 @@ async function macProvider(device: BluetoothDevice, isFallbackCall?: boolean): P
 function handleEvent(e: SmartCubeEvent) {
     switch (e.type) {
         case "MOVE":
-            moveHandler?.(e.move.trim())
+            if (status.mode === "control") moveHandler?.(e.move.trim())
+            else trackerHandlers?.move(e.move.trim(), e.localTimestamp ?? e.timestamp)
+            break
+        case "FACELETS":
+            trackerHandlers?.facelets(e.facelets)
             break
         case "GYRO": {
             const { x, y, z, w } = e.quaternion
@@ -123,6 +139,23 @@ export function setMoveHandler(handler: MoveHandler | null) {
     moveHandler = handler
 }
 
+export function setTrackerHandlers(handlers: TrackerHandlers | null) {
+    trackerHandlers = handlers
+}
+
+export function setMode(mode: Mode) {
+    try { localStorage.setItem(MODE_STORAGE, mode) } catch {}
+    setStatus({ mode })
+    if (mode === "check") requestFacelets()
+}
+
+// Ask the cube for its whole state. A cube that can't report it is taken as solved.
+export function requestFacelets() {
+    if (!conn) return
+    if (conn.capabilities.facelets) conn.sendCommand({ type: "REQUEST_FACELETS" }).catch(() => {})
+    else trackerHandlers?.facelets(SOLVED)
+}
+
 export async function connect() {
     if (conn || status.connecting) return
     setStatus({ connecting: true, error: "" })
@@ -133,6 +166,7 @@ export async function connect() {
         if (conn.capabilities.battery) {
             conn.sendCommand({ type: "REQUEST_BATTERY" }).catch(() => {})
         }
+        requestFacelets()
     } catch (err) {
         conn = null
         const message = String((err as Error)?.message ?? err)
@@ -162,7 +196,7 @@ export function setGyroEnabled(enabled: boolean) {
 // driving it. Every mounted CubeSim asks each frame, so the easing goes by time.
 let lastEase = 0
 export function viewRotation(): THREE.Quaternion {
-    if (!conn || !status.gyroEnabled || !gyroRaw || !gyroBasis) {
+    if (!conn || status.mode !== "control" || !status.gyroEnabled || !gyroRaw || !gyroBasis) {
         return viewQuat.identity()
     }
     const now = performance.now()
@@ -171,4 +205,22 @@ export function viewRotation(): THREE.Quaternion {
     const target = gyroRaw.clone().premultiply(gyroBasis)
     viewQuat.slerp(target, 1 - Math.exp(-dt / 40))
     return viewQuat
+}
+
+// Development builds only: a pretend cube, for trying the checker without one.
+// In the console: smartcubeSim.connect(), then smartcubeSim.moves("R U R' L ...").
+if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+    let time = 0
+    ;(window as any).smartcubeSim = {
+        connect(facelets = SOLVED) {
+            setStatus({ connected: true, name: "Simulated cube" })
+            trackerHandlers?.facelets(facelets)
+        },
+        moves(seq: string, gapMs = 400) {
+            for (const move of seq.split(/\s+/).filter(m => m)) {
+                time += gapMs
+                handleEvent({ type: "MOVE", move, face: 0, direction: 0, localTimestamp: time, cubeTimestamp: null, timestamp: time })
+            }
+        },
+    }
 }

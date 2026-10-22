@@ -26,6 +26,7 @@ import { ColorPanel } from './Input';
 import { CaseDesc } from '../lib/Algs';
 import { ScrambleInputView } from './ScrambleInputView';
 import { CustomTooltip } from './Tooltip';
+import { SmartScramble } from './SmartTrainer';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -122,7 +123,7 @@ const useStyles = makeStyles(theme => ({
   }))
 
 
-function getMask(state: AppState) : Mask {
+export function getMask(state: AppState) : Mask {
     if (state.mode === "fbdr") {
       const fbOnly = (state.case.desc.length === 0 || state.case.desc[0].kind === "fb")
       //   getActiveName(state.config.fbOnlySelector) === "FB Last Pair"
@@ -312,7 +313,7 @@ function BlockTrainerView(props: { state: AppState, dispatch: React.Dispatch<Act
           <Box style={{}} className={classes.fgap} />
           <Box style={{display: "flex", alignItems: "center", flexGrow: 1}}>
             <Typography className={classes.setup} >
-                  {setup}
+                  <SmartScramble setup={setup} revealed={state.name === "revealed"} />
             </Typography>
           </Box>
           <Box style={{}} className={classes.fgap} />

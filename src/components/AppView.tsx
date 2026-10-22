@@ -19,6 +19,7 @@ import Markdown from 'markdown-to-jsx';
 import useMediaQuery from '@material-ui/core/useMediaQuery/useMediaQuery';
 
 import { theme } from '../theme';
+import { SmartTrainer } from './SmartTrainer';
 
 interface TabPanelProps {
   value: number,
@@ -215,6 +216,7 @@ function AppView(props: { state: AppState, dispatch: React.Dispatch<Action> } ) 
       </DialogActions>
       </Dialog>
 
+      <SmartTrainer {...{state, dispatch}} />
       <TopBarView onChange={handleChange} value={value}
         handleInfoOpen={handleInfoOpen} toggleBright={toggleBright} toggleFav={toggleFav}
         dispatch={dispatch}

@@ -7,11 +7,14 @@ import BluetoothConnectedIcon from '@mui/icons-material/BluetoothConnected';
 import BluetoothSearchingIcon from '@mui/icons-material/BluetoothSearching';
 import ScreenRotationIcon from '@mui/icons-material/ScreenRotation';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 
 import { Action } from "../Types";
 import * as SmartCube from '../lib/SmartCube';
 
-// Top-bar buttons for a smart cube: connect, gyro on/off, and reset the view.
+// Top-bar buttons for a smart cube: connect, scramble checker or controller,
+// and (as a controller) gyro on/off and reset the view.
 // Nothing shows in browsers without Web Bluetooth.
 function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "small" | "large" }) {
     let { dispatch, size } = props
@@ -35,9 +38,19 @@ function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "sma
         : status.error ? `Connect smart cube (last attempt failed: ${status.error})`
         : "Connect smart cube"
 
+    const control = status.mode === "control"
     return (
         <React.Fragment>
-            {status.connected && status.gyro &&
+            {status.connected &&
+                <Tooltip title={control ? "The cube is a controller: click to check scrambles instead"
+                                        : "Checking scrambles: click to use the cube as a controller instead"}>
+                    <IconButton onClick={() => SmartCube.setMode(control ? "check" : "control")} size={size}
+                        onFocus={(e) => e.target.blur()}>
+                        {control ? <SportsEsportsIcon /> : <FactCheckIcon />}
+                    </IconButton>
+                </Tooltip>
+            }
+            {status.connected && control && status.gyro &&
                 <Tooltip title={status.gyroEnabled ? "Gyro moves the view: click to turn off" : "Gyro is off: click to turn on"}>
                     <IconButton onClick={() => SmartCube.setGyroEnabled(!status.gyroEnabled)} size={size}
                         style={{ opacity: status.gyroEnabled ? 1 : 0.5 }} onFocus={(e) => e.target.blur()}>
@@ -45,7 +58,7 @@ function SmartCubeControls(props: { dispatch: React.Dispatch<Action>, size: "sma
                     </IconButton>
                 </Tooltip>
             }
-            {status.connected && status.gyro && status.gyroEnabled &&
+            {status.connected && control && status.gyro && status.gyroEnabled &&
                 <Tooltip title="Reset view: hold the cube as the trainer shows it, then click">
                     <IconButton onClick={SmartCube.resetGyro} size={size} onFocus={(e) => e.target.blur()}>
                         <CenterFocusStrongIcon />
